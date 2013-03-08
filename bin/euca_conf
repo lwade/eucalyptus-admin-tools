@@ -26,9 +26,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
-import eucadmin.deregisterrequest
-import eucadmin.describerequest
-import eucadmin.registerrequest
+import argparse
+from eucadmin.configfile import ConfigFile
+import os
 
 cmd_map = {
            '--initialize': ('euca-initialize', 'eucadmin.initialize', 'Initialize'),
@@ -55,6 +55,18 @@ cmd_map = {
            '--register-walrus': ('euca-register-walrus', 'eucadmin.registerrequest', 'RegisterWalrus'),
          }
 
+def build_parser():
+    parser = argparse.ArgumentParser(prog='euca_conf')
+    parser.add_argument('-d', '--euca-home', dest='eucalyptus', 
+                        default=os.environ.get('EUCALYPTUS', '/'))
+    parser.add_argument('--instances', dest='instance_path')
+    parser.add_argument('--hypervisor')
+    parser.add_argument('--user', dest='euca_user')
+    parser.add_argument('--dhcpd')
+    parser.add_argument('--dhcp_user')
+    parser.add_argument('--bridge', dest='vnet_bridge')
+    return parser
+
 if __name__ == "__main__":
     idx = 1
     while idx < len(sys.argv):
@@ -70,7 +82,27 @@ if __name__ == "__main__":
             __import__(modulename)       
             cls = getattr(sys.modules[modulename], clsname)
             cls.run()
+            sys.exit(0)
         idx+=1
+
+    """
+    We will try to apply config changes if people really still
+    want it and they haven't specified another command.
+
+    Notably, this still breaks one command I've seen in the wild:
+    euca_conf --setup --hypervisor { xen | kvm } --instances /some/path
+
+    We can restore this functionality if needed.
+    """
+
+    parser = build_parser()
+    args = parser.parse_args()
+    config = ConfigFile(os.path.join(getattr(args, 'eucalyptus', '/'),
+                        'etc/eucalyptus/eucalyptus.conf'))
+    for arg in [ 'hypervisor', 'euca_user', 'instance_path', 'dhcpd',
+                 'dhcp_user',  'vnet_bridge']:
+        if getattr(args, arg):
+            config[arg.upper()] = getattr(args, arg)
 
     print >>sys.stderr, ("euca_conf is deprecated, and could not map this "
                          "request to a supported command.  Please consult "
