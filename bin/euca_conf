@@ -32,7 +32,7 @@ import eucadmin.registerrequest
 
 cmd_map = {
            '--initialize': ('euca-initialize', 'eucadmin.initialize', 'Initialize'),
-           '--heartbeat':  ('euca-heartbeat', 'eucadmin.heartbeat', 'HeartBeat'),
+           '--heartbeat':  ('euca-heartbeat', 'eucadmin.heartbeat', 'Heartbeat'),
            '--get-credentials': ('euca-get-credentials', 'eucadmin.getcredentials', 'GetCredentials'),
            '--setup': ('euca-setup', 'eucadmin.eucasetup', 'EucaSetup'),
            '--deregister-nodes': ('euca-deregister-nodes', 'eucadmin.deregisterrequest', 'DeregisterNodes'),
