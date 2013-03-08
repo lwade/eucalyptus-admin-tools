@@ -43,9 +43,9 @@ class FixPortMetaClass(type):
             for base in bases:
                 if hasattr(base, 'ARGS'):
                     for param in getattr(base, 'ARGS'):
-                        if param.name == 'Port':
+                        if hasattr(param, 'dest') and param.dest == 'Port':
                             port = attrs['DefaultPort']
-                            param.default = port
+                            setattr(param, 'default', port)
                             param.help = 'Port for service (default=%d)' % port
         return type.__new__(cls, name, bases, attrs)
 
@@ -84,7 +84,8 @@ class RegisterRequest(EucalyptusAdminRequest):
     def main(self):
         EucalyptusAdminRequest.main(self)
         if not self.args.get('no_sync'):
-            self._sync_keys()
+            # TODO: pass a list of keys!
+            self._sync_keys([])
 
     def _sync_keys(self, fnames, host=None):
         key_dir = os.path.join(self.config['EUCALYPTUS'],
