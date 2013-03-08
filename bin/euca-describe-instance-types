@@ -1,0 +1,6 @@
+#!/usr/bin/python
+
+import eucadmin.describeinstancetypes
+
+if __name__ == "__main__":
+    eucadmin.describeinstancetypes.DescribeVmTypes.run()
