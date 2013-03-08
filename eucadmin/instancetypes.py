@@ -78,7 +78,7 @@ class ModifyVmTypeAttribute(EucalyptusAdminRequest):
                  help='Include information about current instance type in the system.'),
              Arg('VmTypes',
                  nargs='1',
-                 help='[[INSTANCETYPE]...]')]
+                 help='[[INSTANCETYPE]...]'),
              Arg('-d', '--disk', dest='Disk',
                  type=int,
                  help='Gigabytes of disk for the root file system image.'),
