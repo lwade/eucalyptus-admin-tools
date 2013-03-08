@@ -1,0 +1,77 @@
+#!/usr/bin/python
+
+# Copyright 2011-2013 Eucalyptus Systems, Inc.
+#
+# Redistribution and use of this software in source and binary forms,
+# with or without modification, are permitted provided that the following
+# conditions are met:
+#
+#   Redistributions of source code must retain the above copyright notice,
+#   this list of conditions and the following disclaimer.
+#
+#   Redistributions in binary form must reproduce the above copyright
+#   notice, this list of conditions and the following disclaimer in the
+#   documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+import sys
+import eucadmin.deregisterrequest
+import eucadmin.describerequest
+import eucadmin.registerrequest
+
+cmd_map = {
+           '--initialize': ('euca-initialize', 'eucadmin.initialize', 'Initialize'),
+           '--heartbeat':  ('euca-heartbeat', 'eucadmin.heartbeat', 'HeartBeat'),
+           '--get-credentials': ('euca-get-credentials', 'eucadmin.getcredentials', 'GetCredentials'),
+           '--setup': ('euca-setup', 'eucadmin.eucasetup', 'EucaSetup'),
+           '--deregister-nodes': ('euca-deregister-nodes', 'eucadmin.deregisterrequest', 'DeregisterNodes'),
+           '--deregister-arbitrator': ('euca-deregister-arbitrator', 'eucadmin.deregisterrequest', 'DeregisterArbitrator'),
+           '--deregister-cloud': ('euca-deregister-cloud', 'eucadmin.deregisterrequest', 'DeregisterEucalyptus'),
+           '--deregister-cluster': ('euca-deregister-cluster', 'eucadmin.deregisterrequest', 'DeregisterCluster'),
+           '--deregister-sc': ('euca-deregister-sc', 'eucadmin.deregisterrequest', 'DeregisterStorageController'),
+           '--deregister-walrus': ('euca-deregister-walrus', 'eucadmin.deregisterrequest', 'DeregisterWalrus'),
+           '--list-nodes': ('euca-describe-nodes', 'eucadmin.describerequest', 'DescribeNodes'),
+           '--list-arbitrators': ('euca-describe-arbitrators', 'eucadmin.describerequest', 'DescribeArbitrators'),
+           '--list-clouds': ('euca-describe-clouds', 'eucadmin.describerequest', 'DescribeEucalyptus'),
+           '--list-clusters': ('euca-describe-clusters', 'eucadmin.describerequest', 'DescribeClusters'),
+           '--list-scs': ('euca-describe-storagecontrollers', 'eucadmin.describerequest', 'DescribeStorageControllers'),
+           '--list-walruses': ('euca-describe-walruses', 'eucadmin.describerequest', 'DescribeWalruses'),
+           '--register-nodes': ('euca-register-nodes', 'eucadmin.registerrequest', 'RegisterNodes'),
+           '--register-arbitrator': ('euca-register-arbitrators', 'eucadmin.registerrequest', 'RegisterArbitrator'),
+           '--register-cloud': ('euca-register-cloud', 'eucadmin.registerrequest', 'RegisterEucalyptus'),
+           '--register-cluster': ('euca-register-cluster', 'eucadmin.registerrequest', 'RegisterCluster'),
+           '--register-sc': ('euca-register-storagecontroller', 'eucadmin.registerrequest', 'RegisterStorageController'),
+           '--register-walrus': ('euca-register-walrus', 'eucadmin.registerrequest', 'RegisterWalrus'),
+         }
+
+if __name__ == "__main__":
+    idx = 1
+    while idx < len(sys.argv):
+        if sys.argv[idx] in cmd_map.keys():
+            key = sys.argv.pop(idx)
+            cmdname, modulename, clsname = cmd_map[key]
+            print >>sys.stderr, ("Warning: euca_conf is deprecated."
+                                 " Please use %s for this operation instead." % cmdname)
+            sys.argv[0] = cmdname
+
+            # Don't try/except this.  If it doesn't work,
+            # it should be an exception
+            __import__(modulename)       
+            cls = getattr(sys.modules[modulename], clsname)
+            cls.run()
+        idx+=1
+
+    print >>sys.stderr, ("euca_conf is deprecated, and could not map this "
+                         "request to a supported command.  Please consult "
+                         "the documentation.")
