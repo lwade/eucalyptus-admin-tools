@@ -89,7 +89,7 @@ class ModifyVmTypeAttribute(EucalyptusAdminRequest):
                  type=int,
                  help='Megabytes of RAM allocated to this instance type.'),
              Arg('-r', '--reset', dest='Reset',
-                 action=store_true,
+                 action='store_true',
                  help='Reset to default values for this instance type'),
            ]
 
