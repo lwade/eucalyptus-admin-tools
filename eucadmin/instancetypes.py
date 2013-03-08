@@ -42,12 +42,7 @@ class DescribeVmTypes(EucalyptusAdminRequest):
                  nargs='?',
                  help='[[INSTANCETYPE]...]')]
 
-
-    def __init__(self, **args):
-      EucalyptusAdminRequest.__init__(self, **args)
-
     def print_result(self, data):
-        import epdb; epdb.st()
         vmtypes = data.get('vmTypeDetails')
         fmt = 'TYPE\t%-20.20s%-10d%-10d%-10d'
         detail_fmt = '%s%06d / %06d %s'
@@ -69,3 +64,34 @@ class DescribeVmTypes(EucalyptusAdminRequest):
                            int(vmtype['memory']))
 
 
+class ModifyVmTypeAttribute(EucalyptusAdminRequest):
+    SERVICE_PATH = 'services/Eucalyptus'
+    API_VERSION = 'eucalyptus'
+    DESCRIPTION = 'Describe the instance types which are available in the system.'
+    LIST_MARKERS = ['vmTypeDetails']
+    METHOD = 'POST'
+    ARGS = [ Arg('-v', '--verbose', dest='Verbose',
+                 action='store_true',
+                 help='Include extended information about the instance type definition.'),
+             Arg('-A', '--availability', dest='Availability',
+                 action='store_true',
+                 help='Include information about current instance type in the system.'),
+             Arg('VmTypes',
+                 nargs='1',
+                 help='[[INSTANCETYPE]...]')]
+             Arg('-d', '--disk', dest='Disk',
+                 type=int,
+                 help='Gigabytes of disk for the root file system image.'),
+             Arg('-c', '--cpu', dest='CPU',
+                 type=int,
+                 help='Number of virtual CPUs allocated to this type of instance.'),
+             Arg('-m', '--name', dest='Memory',
+                 type=int,
+                 help='Megabytes of RAM allocated to this instance type.'),
+             Arg('-r', '--reset', dest='Reset',
+                 action=store_true,
+                 help='Reset to default values for this instance type'),
+           ]
+
+    def print_result(self, data):
+        import epdb; epdb.st()
