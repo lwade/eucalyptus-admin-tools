@@ -27,6 +27,7 @@ from requestbuilder import Arg
 from .describerequest import DescribeServices
 from .adminservice import EucalyptusAdminRequest
 from .synckeys import SyncKeys
+import os
 import sys
 
 class FixPortMetaClass(type):
@@ -85,12 +86,12 @@ class RegisterRequest(EucalyptusAdminRequest):
         EucalyptusAdminRequest.main(self)
         if not self.args.get('no_sync'):
             # TODO: pass a list of keys!
-            self._sync_keys([])
+            self._sync_keys(self.KEYS)
 
     def _sync_keys(self, fnames, host=None):
-        key_dir = os.path.join(self.config['EUCALYPTUS'],
+        key_dir = os.path.join(os.environ.get('EUCALYPTUS', '/'),
                                'var/lib/eucalyptus/keys')
-        file_paths = [os.path.join(key_dir, fname) for fname in fnames]
+        file_paths = [os.path.join(key_dir, fname % self.args) for fname in fnames]
         req = SyncKeys(file_paths, key_dir, (host or self.args['Host']),
                        use_rsync=(not self.args.get('no_rsync')),
                        use_scp=(not self.args.get('no_scp')))
@@ -137,13 +138,12 @@ class RegisterRequest(EucalyptusAdminRequest):
         partitions = self.get_partitions() - self.original_partitions
         name = self.args.get('Name')
         service_info = self.get_service_info(name)
-        import epdb; epdb.st()
+        print service_info
 
     def get_service_info(self, name, debug=0):
         obj = DescribeServices(url=self.args.get('url'))
         response = obj.main()
-        statuses = (response.get('DescribeServicesResponseType', {}) 
-                            .get('serviceStatuses', []))
+        statuses = (response.get('serviceStatuses', []))
         for status in statuses:
             svcname = status.get('serviceId', {}).get('name')
             if svcname == name:
@@ -184,6 +184,7 @@ class RegisterEucalyptus(RegisterRequest):
 class RegisterStorageController(RegisterRequest):
     ServiceName = 'Storage Controller'
     DESCRIPTION = 'Register a StorageController service.'
+    KEYS = ['euca.p12']
 
     def main(self, **args):
         """
@@ -215,4 +216,5 @@ class RegisterStorageController(RegisterRequest):
 
 class RegisterWalrus(RegisterRequest):
     ServiceName = 'Walrus'
-    Description = 'Register a Walrus service.'
+    DESCRIPTION = 'Register a Walrus service.'
+    KEYS = ['euca.p12']
