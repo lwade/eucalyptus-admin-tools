@@ -33,7 +33,7 @@ import os
 
 class DescribeRequest(EucalyptusAdminRequest):
     API_VERSION = '2013-02-14'
-    LIST_MARKERS = ['registered']
+    LIST_TAGS = ['registered']
     ITEM_MARKERS = ['item']
 
     def __init__(self, **args):
@@ -86,7 +86,7 @@ class DescribeWalruses(DescribeRequest):
 class DescribeNodes(DescribeRequest):
     ServiceName = 'Node'
     DESCRIPTION = 'List Node controllers.'
-    LIST_MARKERS = ['registered', 'instances']
+    LIST_TAGS = ['registered', 'instances']
 
     def __init__(self, **kwargs):
         DescribeRequest.__init__(self, **kwargs)
@@ -113,11 +113,12 @@ class DescribeEucalyptus(DescribeRequest):
     def print_result(self, data):
         clouds = data.get('registered')
         for cloud in clouds:
-            print 'CLOUDS\t%s\t%s\t%s\t%s\t%s' % (cloud['partition'],
-                                                  cloud['name'],
-                                                  cloud['hostName'],
-                                                  cloud['state'],
-                                                  cloud['detail'])
+            print self.tabify('CLOUDS',
+                              cloud['partition'],
+                              cloud['name'],
+                              cloud['hostName'],
+                              cloud['state'],
+                              cloud['detail'])
 
 class DescribeComponents(DescribeRequest):
     ServiceName = 'Component'
@@ -138,17 +139,17 @@ class DescribeComponents(DescribeRequest):
 class DescribeProperties(DescribeRequest):
     ServiceName = 'Property'
     DESCRIPTION = 'List properties.'
-    LIST_MARKERS = ['properties']
+    LIST_TAGS = ['properties']
 
     def print_result(self, data):
         props = data.get('properties')
         for prop in props:
-            print 'PROPERTY\t%s\t%s' % (prop['name'], prop['value'])
+            print self.tabify([ 'PROPERTY', prop['name'], prop['value'] ])
 
 class DescribeServices(EucalyptusAdminRequest):
 
     DESCRIPTION = 'Get services'
-    LIST_MARKERS = ['serviceStatuses']
+    LIST_TAGS = ['serviceStatuses']
     METHOD = 'GET'
     SERVICE_PATH = 'services/Empyrean/'
 

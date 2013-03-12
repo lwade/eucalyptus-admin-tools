@@ -31,7 +31,7 @@ class DescribeVmTypes(EucalyptusAdminRequest):
     SERVICE_PATH = 'services/Eucalyptus'
     API_VERSION = 'eucalyptus'
     DESCRIPTION = 'Describe the instance types which are available in the system.'
-    LIST_MARKERS = ['vmTypeDetails']
+    LIST_TAGS = ['vmTypeDetails']
     ARGS = [ Arg('-v', '--verbose', dest='Verbose',
                  action='store_true',
                  help='Include extended information about the instance type definition.'),
@@ -68,7 +68,7 @@ class ModifyVmTypeAttribute(EucalyptusAdminRequest):
     SERVICE_PATH = 'services/Eucalyptus'
     API_VERSION = 'eucalyptus'
     DESCRIPTION = 'Describe the instance types which are available in the system.'
-    LIST_MARKERS = ['vmTypeDetails']
+    LIST_TAGS = ['vmTypeDetails']
     METHOD = 'POST'
     ARGS = [ Arg('-v', '--verbose', dest='Verbose',
                  action='store_true',
