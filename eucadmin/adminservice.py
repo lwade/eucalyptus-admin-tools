@@ -57,7 +57,7 @@ class EucalyptusAdminQuerySigV2Auth(QuerySigV2Auth):
         if not self.args.get('key_id') and not self.args.get('secret_key'):
             url = None # 'http://localhost:8773/services/Eucalyptus'
             (self.args['key_id'], 
-             self.args['secret_key']) = GetCredentials(euca_home='/',
+             self.args['secret_key']) = GetCredentials(euca_home=os.environ.get('EUCALYPTUS', '/'),
                                                        account='eucalyptus',
                                                        user='admin').main()
 
@@ -79,6 +79,7 @@ class EucalyptusAdminService(requestbuilder.service.BaseService):
                     route_to=SERVICE,
                     help='region name to connect to, with optional identity'),
                 Arg('-U', '--url', metavar='URL', route_to=SERVICE,
+                    default='http://localhost:8773',
                     help='compute service endpoint URL'))]
 
     def configure(self):
