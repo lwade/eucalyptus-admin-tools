@@ -91,7 +91,7 @@ class DescribeNodes(DescribeRequest):
     def __init__(self, **kwargs):
         DescribeRequest.__init__(self, **kwargs)
 
-    def cli_formatter(self, data):
+    def print_result(self, data):
         nodes = data.get('registered')
         for node in nodes:
             instances = node.get('instances')
