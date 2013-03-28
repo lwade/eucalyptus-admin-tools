@@ -112,7 +112,9 @@ class Validator(object):
         self.setupLogging()
 
     def setupLogging(self):
+        logging.basicConfig()
         self.log = logging.getLogger(__name__)
+        self.log.setLevel(logging.DEBUG)
 
     @classmethod
     def run(cls):
@@ -149,12 +151,15 @@ class Validator(object):
         return failed
 
     def main(self):
+        self.log.debug("Reading configuration files: %s" % self.admincfg.validator_config_path)
         data = read_validator_config(files=self.admincfg.validator_config_path.split(':'))
 
         result = {}
+        self.log.debug('Script search path is %s' % self.admincfg.validator_script_path)
         for script in data.get(self.stage, {}).get(self.component, []):
             for dirpath in self.admincfg.validator_script_path.split(':'):
                 if os.path.exists(os.path.join(dirpath, script)):
+                    self.log.debug('Running script: %s' % os.path.join(dirpath, script))
                     return_val = run_script(os.path.join(dirpath, script))
                     result[script] = json.loads(return_val)
                     break
