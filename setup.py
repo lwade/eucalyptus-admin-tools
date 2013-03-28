@@ -28,6 +28,7 @@
 # from distutils.core import setup
 from setuptools import setup
 import glob
+import sys
 
 setup(name="eucadmin",
       version='0.0.1',
@@ -93,7 +94,7 @@ setup(name="eucadmin",
           "bin/euca_conf",
       ],
       data_files=[
-          ("/etc/eucadmin", ['config/validator.yaml', 'config/eucadmin.conf']),
-          ("/usr/lib/eucadmin/validator-scripts", glob.glob('validator-scripts/*')),
+          (sys.prefix+"/lib/eucadmin", ['config/validator.yaml']),
+          (sys.prefix+"/lib/eucadmin/validator-scripts", glob.glob('validator-scripts/*')),
       ]
 )
