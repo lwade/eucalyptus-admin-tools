@@ -27,8 +27,19 @@
 
 # from distutils.core import setup
 from setuptools import setup
+from distutils.command.install_data import install_data
+
 import glob
+import os
 import sys
+
+class ExecutableDataFiles(install_data):
+    def run(self):
+        install_data.run(self)
+        for x in self.outfiles:
+            if x.startswith(sys.prefix+"/lib/eucadmin/validator-scripts/"):
+                os.chmod(x, 0755)
+
 
 setup(name="eucadmin",
       version='0.0.1',
@@ -96,5 +107,7 @@ setup(name="eucadmin",
       data_files=[
           (sys.prefix+"/lib/eucadmin", ['config/validator.yaml']),
           (sys.prefix+"/lib/eucadmin/validator-scripts", glob.glob('validator-scripts/*')),
-      ]
+      ],
+      cmdclass={'install_data':  ExecutableDataFiles},
+
 )
