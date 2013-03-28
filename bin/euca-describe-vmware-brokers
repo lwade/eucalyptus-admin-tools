@@ -1,6 +1,0 @@
-#!/usr/bin/python
-
-import eucadmin.configurevmware
-
-if __name__ == "__main__":
-    eucadmin.configurevmware.DescribeVMwareBrokers.run()

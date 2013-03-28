@@ -1,6 +1,0 @@
-#!/usr/bin/python
-
-import eucadmin.eucasetup
-
-if __name__ == "__main__":
-    eucadmin.eucasetup.EucaSetup.run()

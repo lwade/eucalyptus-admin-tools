@@ -28,8 +28,9 @@ import os
 import pwd
 import sys
 import argparse
-from .configfile import ConfigFile
+from .configfile import EucaConfigFile
 from . import Eucadmin
+from .constants import EUCA_CONF_FILE
 
 InitCommand = """%s/usr/sbin/eucalyptus-cloud -u %s -h %s --initialize"""
 
@@ -124,7 +125,7 @@ class Initialize(object):
         args = parser.parse_args()
         if args.version:
             Eucadmin.print_version_and_exit()
-        obj = cls(ConfigFile(os.path.join(getattr(args, 'euca_home'),
-                                          'etc/eucalyptus/eucalyptus.conf')),
+        obj = cls(EucaConfigFile(os.path.join(getattr(args, 'euca_home'),
+                                          EUCA_CONF_FILE)),
                   debug=getattr(args, 'debug'))
         obj.main()

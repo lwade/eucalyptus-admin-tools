@@ -11,7 +11,8 @@ import urllib
 import urlparse
 import logging
 
-from .configfile import ConfigFile
+from .configfile import EucaConfigFile
+from .cfg import AdminConfig
 from .describerequest import DescribeServices
 from .describerequest import DescribeNodes
 from .sshconnection import SshConnection
@@ -19,14 +20,6 @@ from .constants import *
 import debug
 
 sys.excepthook = debug.gen_except_hook(True, True)
-
-check_path = [ os.path.join(cfg_dir, "check.d"),
-               os.path.join(cfg_dir, "mmcheck.d"),
-               os.path.join(data_dir, "check.d"),
-               os.path.join(data_dir, "mmcheck.d"),
-               os.path.join(os.path.dirname(__file__), '..', 'check.d'),
-               os.path.join(os.path.dirname(__file__), '..', 'mmcheck.d'),
-             ]
 
 # Currently, these three are the only components returned by
 # DescribeServices that we traverse.
@@ -62,12 +55,11 @@ def read_validator_config(files=[]):
 
 def build_parser():
     parser = argparse.ArgumentParser(prog='Eucalyptus cloud validator')
-    parser.add_argument('-d', '--euca-home', dest='eucalyptus',
-                        default=os.environ.get('EUCALYPTUS', '/'))
     parser.add_argument('stage',
                         default='monitor')
     parser.add_argument('-c', '--config-file',
-                        default=None)
+                        default=DEFAULT_CONFIG_FILE,
+                        help='The path to the eucadmin config')
     parser.add_argument('-C', '--component',
                         default='CLC',
                         help='The cloud component role(s) of this system.')
@@ -89,9 +81,11 @@ def run_script(scriptPath):
     stdout = po.communicate()[0]
     return stdout
 
-def run_remote(host, component, stage, traverse=False):
+def run_remote(host, component, stage, traverse=False, environ={}):
    t=traverse and "-t" or ""
    ssh = SshConnection(host, username="root")
+   # NB: euca-validator must be in the PATH and must have a usable
+   # configuration on the remote system!
    cmd = 'euca-validator %s -C %s %s -j' % (t, component_map.get(component, component), stage)
    out = ssh.cmd(cmd, timeout=600)
    try:
@@ -101,16 +95,19 @@ def run_remote(host, component, stage, traverse=False):
        return {'cmd': cmd, "output": { "euca-validator": { "failed": 1, "error": str(e) } } }
 
 class Validator(object):
-    def __init__(self, stage="monitor", component="CLC", traverse=False, **kwargs):
-        if stage != 'preinstall' or (component == "CC" and traverse):
-            self.euca_conf = ConfigFile(os.path.join(kwargs.get('eucalyptus', '/'),
-                                        'etc/eucalyptus/eucalyptus.conf'))
+    def __init__(self, stage="monitor", component="CLC", traverse=False, 
+                 config_file=DEFAULT_CONFIG_FILE, **kwargs):
 
         # TODO: allow a component list?
         os.environ['EUCA_ROLES'] = component
         self.stage = stage
         self.component = component
         self.traverse = traverse
+        self.admincfg = AdminConfig(config_file)
+
+        if stage != 'preinstall' or (component == "CC" and traverse):
+            self.euca_conf = EucaConfigFile(os.path.join(self.admincfg.eucalyptus,
+                                                         EUCA_CONF_FILE))
 
         self.setupLogging()
 
@@ -135,7 +132,7 @@ class Validator(object):
         failed = False
         for key in result.keys():
             if type(result[key]) != dict:
-                import epdb; epdb.st()
+                raise Exception("Error parsing validation data")
             if result[key].has_key('cmd'):
                 failed |= Validator.check_nested_result(parent + key + ":", 
                                                         result[key]['output'],
@@ -152,11 +149,11 @@ class Validator(object):
         return failed
 
     def main(self):
-        data = read_validator_config(files=[os.path.join(cfg_dir, 'validator.yaml')])
+        data = read_validator_config(files=self.admincfg.validator_config_path.split(':'))
 
         result = {}
         for script in data.get(self.stage, {}).get(self.component, []):
-            for dirpath in check_path:
+            for dirpath in self.admincfg.validator_script_path.split(':'):
                 if os.path.exists(os.path.join(dirpath, script)):
                     return_val = run_script(os.path.join(dirpath, script))
                     result[script] = json.loads(return_val)

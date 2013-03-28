@@ -1,6 +1,0 @@
-#!/usr/bin/python
-
-import eucadmin.modifyservice
-
-if __name__ == "__main__":
-    eucadmin.modifyservice.ModifyService.run()

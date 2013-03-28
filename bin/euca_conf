@@ -27,32 +27,35 @@
 
 import sys
 import argparse
-from eucadmin.configfile import ConfigFile
+from eucadmin.configfile import EucaConfigFile
+from eucadmin.constants import *
 import os
 
+from pkg_resources import load_entry_point
+
 cmd_map = {
-           '--initialize': ('euca-initialize', 'eucadmin.initialize', 'Initialize'),
-           '--heartbeat':  ('euca-heartbeat', 'eucadmin.heartbeat', 'Heartbeat'),
-           '--get-credentials': ('euca-get-credentials', 'eucadmin.getcredentials', 'GetCredentials'),
-           '--setup': ('euca-setup', 'eucadmin.eucasetup', 'EucaSetup'),
-           '--deregister-nodes': ('euca-deregister-nodes', 'eucadmin.deregisterrequest', 'DeregisterNodes'),
-           '--deregister-arbitrator': ('euca-deregister-arbitrator', 'eucadmin.deregisterrequest', 'DeregisterArbitrator'),
-           '--deregister-cloud': ('euca-deregister-cloud', 'eucadmin.deregisterrequest', 'DeregisterEucalyptus'),
-           '--deregister-cluster': ('euca-deregister-cluster', 'eucadmin.deregisterrequest', 'DeregisterCluster'),
-           '--deregister-sc': ('euca-deregister-sc', 'eucadmin.deregisterrequest', 'DeregisterStorageController'),
-           '--deregister-walrus': ('euca-deregister-walrus', 'eucadmin.deregisterrequest', 'DeregisterWalrus'),
-           '--list-nodes': ('euca-describe-nodes', 'eucadmin.describerequest', 'DescribeNodes'),
-           '--list-arbitrators': ('euca-describe-arbitrators', 'eucadmin.describerequest', 'DescribeArbitrators'),
-           '--list-clouds': ('euca-describe-clouds', 'eucadmin.describerequest', 'DescribeEucalyptus'),
-           '--list-clusters': ('euca-describe-clusters', 'eucadmin.describerequest', 'DescribeClusters'),
-           '--list-scs': ('euca-describe-storagecontrollers', 'eucadmin.describerequest', 'DescribeStorageControllers'),
-           '--list-walruses': ('euca-describe-walruses', 'eucadmin.describerequest', 'DescribeWalruses'),
-           '--register-nodes': ('euca-register-nodes', 'eucadmin.registerrequest', 'RegisterNodes'),
-           '--register-arbitrator': ('euca-register-arbitrators', 'eucadmin.registerrequest', 'RegisterArbitrator'),
-           '--register-cloud': ('euca-register-cloud', 'eucadmin.registerrequest', 'RegisterEucalyptus'),
-           '--register-cluster': ('euca-register-cluster', 'eucadmin.registerrequest', 'RegisterCluster'),
-           '--register-sc': ('euca-register-storagecontroller', 'eucadmin.registerrequest', 'RegisterStorageController'),
-           '--register-walrus': ('euca-register-walrus', 'eucadmin.registerrequest', 'RegisterWalrus'),
+           '--initialize': 'euca-initialize',
+           '--heartbeat': 'euca-heartbeat',
+           '--get-credentials': 'euca-get-credentials',
+           '--setup': 'euca-setup',
+           '--deregister-nodes': 'euca-deregister-nodes',
+           '--deregister-arbitrator': 'euca-deregister-arbitrator',
+           '--deregister-cloud': 'euca-deregister-cloud',
+           '--deregister-cluster': 'euca-deregister-cluster',
+           '--deregister-sc': 'euca-deregister-sc',
+           '--deregister-walrus': 'euca-deregister-walrus',
+           '--list-nodes': 'euca-describe-nodes',
+           '--list-arbitrators': 'euca-describe-arbitrators',
+           '--list-clouds': 'euca-describe-clouds',
+           '--list-clusters': 'euca-describe-clusters',
+           '--list-scs': 'euca-describe-storagecontrollers',
+           '--list-walruses': 'euca-describe-walruses',
+           '--register-nodes': 'euca-register-nodes',
+           '--register-arbitrator': 'euca-register-arbitrators',
+           '--register-cloud': 'euca-register-cloud',
+           '--register-cluster': 'euca-register-cluster',
+           '--register-sc': 'euca-register-storagecontroller',
+           '--register-walrus': 'euca-register-walrus',
          }
 
 def build_parser():
@@ -70,19 +73,14 @@ def build_parser():
 if __name__ == "__main__":
     idx = 1
     while idx < len(sys.argv):
-        if sys.argv[idx] in cmd_map.keys():
+        if cmd_map.has_key(sys.argv[idx]):
             key = sys.argv.pop(idx)
-            cmdname, modulename, clsname = cmd_map[key]
+            cmdname = cmd_map[key]
             print >>sys.stderr, ("Warning: euca_conf is deprecated."
                                  " Please use %s for this operation instead." % cmdname)
             sys.argv[0] = cmdname
 
-            # Don't try/except this.  If it doesn't work,
-            # it should be an exception
-            __import__(modulename)       
-            cls = getattr(sys.modules[modulename], clsname)
-            cls.run()
-            sys.exit(0)
+            sys.exit(load_entry_point('eucadmin', 'console_scripts', cmdname))
         idx+=1
 
     """
@@ -97,8 +95,8 @@ if __name__ == "__main__":
 
     parser = build_parser()
     args = parser.parse_args()
-    config = ConfigFile(os.path.join(getattr(args, 'eucalyptus', '/'),
-                        'etc/eucalyptus/eucalyptus.conf'))
+    config = EucaConfigFile(os.path.join(getattr(args, 'eucalyptus', '/'),
+                            EUCA_CONF_FILE))
     for arg in [ 'hypervisor', 'euca_user', 'instance_path', 'dhcpd',
                  'dhcp_user',  'vnet_bridge']:
         if getattr(args, arg):

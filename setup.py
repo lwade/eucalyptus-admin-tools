@@ -25,90 +25,75 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import sys
-import os
-from distutils.command.build_scripts import build_scripts
-from distutils.core import setup
-from distutils.sysconfig import get_python_lib
-import fileinput
-import ConfigParser
-
-cfg = ConfigParser.ConfigParser()
-cfg.read('setup.cfg')
-prefix  = cfg.get('install', 'prefix')
-version = cfg.get('meta',    'version')
-
-class build_scripts_with_path_headers(build_scripts):
-    def run(self):
-        build_scripts.run(self)
-        self.path_header = get_python_lib(prefix=prefix).replace('dist-packages', 'site-packages')
-        self.outfiles = [os.path.join(self.build_dir, os.path.basename(script))
-                         for script in self.distribution.scripts]
-        self.add_paths_to_scripts()
-
-    def add_paths_to_scripts(self):
-        print 'adding path %s to scripts' % self.path_header
-        for line in fileinput.input(self.outfiles, inplace=1, backup=None):
-            if fileinput.isfirstline():
-                print line.rstrip()
-                print 'import sys'
-                print 'sys.path.append("%s")' % self.path_header
-            elif line.strip() == 'import sys':
-                pass
-            elif line.strip().startswith('sys.path.append'):
-                pass
-            else:
-                print line.rstrip()
-
-admin_scripts = ["bin/euca_conf",
-                 "bin/euca-configure-vmware",
-                 "bin/euca-deregister-arbitrator",
-                 "bin/euca-deregister-cloud",
-                 "bin/euca-deregister-cluster",
-                 "bin/euca-deregister-storage-controller",
-                 "bin/euca-deregister-vmware-broker",
-                 "bin/euca-deregister-walrus",
-                 "bin/euca-describe-arbitrators",
-                 "bin/euca-describe-clouds",
-                 "bin/euca-describe-clusters",
-                 "bin/euca-describe-components",
-                 "bin/euca-describe-instance-types",
-                 "bin/euca-describe-nodes",
-                 "bin/euca-describe-properties",
-                 "bin/euca-describe-services",
-                 "bin/euca-describe-storage-controllers",
-                 "bin/euca-describe-vmware-brokers",
-                 "bin/euca-describe-walruses",
-                 "bin/euca-get-credentials",
-                 "bin/euca-modify-property",
-                 "bin/euca-modify-service",
-                 "bin/euca-register-arbitrator",
-                 "bin/euca-register-cloud",
-                 "bin/euca-register-cluster",
-                 "bin/euca-register-storage-controller",
-                 "bin/euca-register-vmware-broker",
-                 "bin/euca-register-walrus",
-                 # "bin/eureport-delete-data",
-                 # "bin/eureport-export-data",
-                 # "bin/eureport-generate-report",
-                 ]
+# from distutils.core import setup
+from setuptools import setup
+import glob
 
 setup(name="eucadmin",
-      version=version,
+      version='0.0.1',
       description="Eucalyptus Admin Tools",
-      long_description="CLI tools to help administer Eucalyptus",
+      entry_points = {
+          'console_scripts': [
+              'euca-configure-vmware = eucadmin.configurevmware:ConfigureVMware.run',
+              'euca-deregister-arbitrator = eucadmin.deregisterrequest:DeregisterArbitrator.run',
+              'euca-deregister-cloud = eucadmin.deregisterrequest:DeregisterEucalyptus.run',
+              'euca-deregister-cluster = eucadmin.deregisterrequest:DeregisterCluster.run',
+              'euca-deregister-storage-controller = eucadmin.deregisterrequest:DeregisterStorageController.run',
+              'euca-deregister-vmware-broker = eucadmin.configurevmware:DeregisterVMwareBroker.run',
+              'euca-deregister-walrus = eucadmin.deregisterrequest:DeregisterWalrus.run',
+              'euca-describe-arbitrators = eucadmin.describerequest:DescribeArbitrators.run',
+              'euca-describe-clouds = eucadmin.describerequest:DescribeEucalyptus.run',
+              'euca-describe-clusters = eucadmin.describerequest:DescribeClusters.run',
+              'euca-describe-components = eucadmin.describerequest:DescribeComponents.run',
+              'euca-describe-instance-types = eucadmin.instancetypes:DescribeVmTypes.run',
+              'euca-describe-nodes = eucadmin.describerequest:DescribeNodes.run',
+              'euca-describe-properties = eucadmin.describerequest:DescribeProperties.run',
+              'euca-describe-services = eucadmin.describerequest:DescribeServices.run',
+              'euca-describe-storage-controllers = eucadmin.describerequest:DescribeStorageControllers.run',
+              'euca-describe-vmware-brokers = eucadmin.configurevmware:DescribeVMwareBrokers.run',
+              'euca-describe-walruses = eucadmin.describerequest:DescribeWalruses.run',
+              'euca-evacuate-node = eucadmin.evacuatenode:EvacuateNode.run',
+              'euca-get-credentials = eucadmin.getcredentials:GetCredentials.run',
+              'euca-heartbeat = eucadmin.heartbeat:Heartbeat.run',
+              'euca-initialize-cloud = eucadmin.initialize:Initialize.run',
+              'euca-modify-cluster = eucadmin.modifyclusterattribute:ModifyClusterAttribute.run',
+              'euca-modify-instance-type-attribute = eucadmin.instancetypes:ModifyVmTypeAttribute.run',
+              'euca-modify-property = eucadmin.modifypropertyvalue:ModifyPropertyValue.run',
+              'euca-modify-service = eucadmin.modifyservice:ModifyService.run',
+              'euca-modify-storage-controller = eucadmin.modifystoragecontroller:ModifyStorageControllerAttribute.run',
+              'euca-modify-walrus = eucadmin.modifywalrus:ModifyWalrusAttribute.run',
+              'euca-register-arbitrator = eucadmin.registerrequest:RegisterArbitrator.run',
+              'euca-register-cloud = eucadmin.registerrequest:RegisterEucalyptus.run',
+              'euca-register-cluster = eucadmin.registerrequest:RegisterCluster.run',
+              'euca-register-storage-controller = eucadmin.registerrequest:RegisterStorageController.run',
+              'euca-register-vmware-broker = eucadmin.configurevmwar:RegisterVMwareBroker.run',
+              'euca-register-walrus = eucadmin.registerrequest:RegisterWalrus.run',
+              'euca-setup = eucadmin.eucasetup:EucaSetup.run',
+              'euca-validator = eucadmin.validator:Validator.run',
+          ],
+      },
+      long_description="CLI for Eucalyptus administration",
       author="Andy Grimm",
-      author_email="agrimm@eucalyptus.com",
+      author_email="agrimm@gmail.com",
       url="http://eucalyptus.com/",
       packages=['eucadmin'],
       license='BSD',
       platforms='Posix; MacOS X; Windows',
-      classifiers=[ 'Development Status :: 5 - Production/Stable',
+      classifiers=[ 'Development Status :: 3 - Alpha',
                       'Intended Audience :: Developers',
                       'License :: OSI Approved :: BSD License',
                       'Operating System :: OS Independent',
                       'Topic :: Internet',
                       ],
-      cmdclass={'build_scripts': build_scripts_with_path_headers},
-      scripts=admin_scripts,
-      )
+      install_requires=[
+          "requestbuilder",
+          "argparse",
+      ],
+      scripts=[
+          "bin/euca_conf",
+      ],
+      data_files=[
+          ("/etc/eucadmin", ['config/validator.yaml', 'config/eucadmin.conf']),
+          ("/usr/lib/eucadmin/validator-scripts", glob.glob('validator-scripts/*')),
+      ]
+)

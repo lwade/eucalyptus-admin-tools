@@ -26,13 +26,15 @@
 import os
 import re
 import shutil
+import shlex
+from .constants import EUCA_CONF_FILE
 
 keyValString = '^(\S+)\s*=\s*"(.*)"\s*(#.*)?$'
 commentedKeyValString = '^#\s+(%s)$' % keyValString[1:-1]
 kvRE = re.compile(keyValString)
 ckvRE = re.compile(commentedKeyValString)
 
-class ConfigFile(dict):
+class EucaConfigFile(dict):
 
     @staticmethod
     def get_file_path():
@@ -40,7 +42,7 @@ class ConfigFile(dict):
         find eucalyptus.conf
         """
         return os.path.join(os.environ.get('EUCALYPTUS', '/'),
-                            '/etc/eucalyptus/eucalyptus.conf')
+                            EUCA_CONF_FILE)
 
     def __init__(self, filepath, test=False, autosave=True):
         dict.__init__(self)
@@ -193,3 +195,4 @@ class ConfigFile(dict):
 
         open(self.path, 'w').write('\n'.join(self._content) + '\n')
         self._dirty = False
+

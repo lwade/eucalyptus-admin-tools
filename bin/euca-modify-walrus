@@ -1,6 +1,0 @@
-#!/usr/bin/python
-
-import eucadmin.modifywalrus
-
-if __name__ == "__main__":
-    eucadmin.modifywalrus.ModifyWalrusAttribute.run()
