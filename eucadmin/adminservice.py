@@ -38,6 +38,7 @@ import requestbuilder.service
 import requests
 import os
 import sys
+import urlparse
 from . import Eucadmin
 from eucadmin.getcredentials import GetCredentials
 
@@ -79,18 +80,20 @@ class EucalyptusAdminService(requestbuilder.service.BaseService):
                     route_to=SERVICE,
                     help='region name to connect to, with optional identity'),
                 Arg('-U', '--url', metavar='URL', route_to=SERVICE,
-                    default='http://localhost:8773',
                     help='compute service endpoint URL'))]
 
     def configure(self):
         # self.args gets highest precedence for self.endpoint and user/region
         self.process_url(self.args.get('url'))
-        if self.args.get('userregion'):
-            self.process_userregion(self.args['userregion'])
+        # if self.args.get('userregion'):
+        #     self.process_userregion(self.args['userregion'])
         # Environment
-        self.process_url(os.getenv(self.URL_ENVVAR))
+        urlparts = urlparse.urlsplit(os.getenv(self.URL_ENVVAR))
+        self.process_url("%s://%s" % (urlparts.scheme, urlparts.netloc))
         # Regular config file
         self.process_url(self.config.get_region_option(self.NAME + '-url'))
+        # Fallback
+        self.process_url('http://localhost:8773')
 
         # Ensure everything is okay and finish up
         self.validate_config()
