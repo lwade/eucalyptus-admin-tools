@@ -88,8 +88,9 @@ class EucalyptusAdminService(requestbuilder.service.BaseService):
         # if self.args.get('userregion'):
         #     self.process_userregion(self.args['userregion'])
         # Environment
-        urlparts = urlparse.urlsplit(os.getenv(self.URL_ENVVAR))
-        self.process_url("%s://%s" % (urlparts.scheme, urlparts.netloc))
+        if os.getenv(self.URL_ENVVAR):
+            urlparts = urlparse.urlsplit(os.getenv(self.URL_ENVVAR))
+            self.process_url("%s://%s" % (urlparts.scheme, urlparts.netloc))
         # Regular config file
         self.process_url(self.config.get_region_option(self.NAME + '-url'))
         # Fallback
