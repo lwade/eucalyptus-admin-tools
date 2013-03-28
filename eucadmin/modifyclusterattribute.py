@@ -32,7 +32,7 @@ class EncodeProperty(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         t = value.split('=')
         if len(t) != 2:
-            print >>sys.stderr "Options must be of the form KEY=VALUE: %s" % value
+            print >>sys.stderr, "Options must be of the form KEY=VALUE: %s" % value
             sys.exit(1)
         setattr(namespace, 'Attribute', t[0])
         setattr(namespace, 'Value', t[1])
@@ -42,7 +42,7 @@ class ModifyClusterAttribute(EucalyptusAdminRequest):
     DESCRIPTION = 'Modify cluster attribute'
 
     ARGS = [ Arg('Name', '--name',
-                 help='The cluster name')]
+                 help='The cluster name'),
              Arg('-p', '--property', dest='property',
                 required=True,
                 action=EncodeProperty,
