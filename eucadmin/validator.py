@@ -17,7 +17,7 @@ from .describerequest import DescribeServices
 from .describerequest import DescribeNodes
 from .sshconnection import SshConnection
 from .constants import *
-import debug
+from eucadmin import debug
 
 sys.excepthook = debug.gen_except_hook(True, True)
 
@@ -81,18 +81,6 @@ def run_script(scriptPath):
     stdout = po.communicate()[0]
     return stdout
 
-def run_remote(host, component, stage, traverse=False, environ={}):
-   t=traverse and "-t" or ""
-   ssh = SshConnection(host, username="root")
-   # NB: euca-validator must be in the PATH and must have a usable
-   # configuration on the remote system!
-   cmd = 'euca-validator %s -C %s %s -j' % (t, component_map.get(component, component), stage)
-   out = ssh.cmd(cmd, timeout=600)
-   try:
-       out['output'] = json.loads(out['output'])
-       return out
-   except Exception, e:
-       return {'cmd': cmd, "output": { "euca-validator": { "failed": 1, "error": str(e) } } }
 
 class Validator(object):
     def __init__(self, stage="monitor", component="CLC", traverse=False, 
@@ -150,6 +138,20 @@ class Validator(object):
                     failed = True
         return failed
 
+    def run_remote(self, host, component, stage, traverse=False, dbg=False):
+       t=traverse and "-t" or ""
+       ssh = SshConnection(host, username="root")
+       # NB: euca-validator must be in the PATH and must have a usable
+       # configuration on the remote system!
+       cmd = 'euca-validator %s -C %s %s -j' % (t, component_map.get(component, component), stage)
+       out = ssh.cmd(cmd, timeout=600, get_pty=False)
+       try:
+           out['output'] = json.loads(out['output'])
+           return out
+       except Exception, e:
+           self.log.warning("Remote command failed: %s" % out['output'])
+           return {'cmd': cmd, "output": { "euca-validator": { "failed": 1, "error": str(e) } } }
+    
     def main(self):
         self.log.debug("Reading configuration files: %s" % self.admincfg.validator_config_path)
         data = read_validator_config(files=self.admincfg.validator_config_path.split(':'))
@@ -181,13 +183,16 @@ class Validator(object):
 
             for host, component_type, status in hosts:
                 # print "running sub-check: %s - %s - %s" % (host, component_type, args.stage)
-                result['-'.join([host, component_type])] = run_remote(host, component_type, self.stage, traverse=self.traverse)
+                result['-'.join([host, component_type])] = self.run_remote(host, component_type, 
+                                                                           self.stage, 
+                                                                           traverse=self.traverse,
+                                                                           dbg=True)
 
         elif self.component == "CC" and self.traverse:
             # describe nodes is a CLC call; get from config file
             # dn = DescribeNodes(url='http://localhost:8773',)
             # data = dn.main()
             for host in self.euca_conf["NODES"].split():
-                result[host] = run_remote(host, "NC", self.stage)
+                result[host] = self.run_remote(host, "NC", self.stage, dbg=True)
 
         return result
