@@ -1,7 +1,7 @@
 # Simple configuration for eucadmin
 import shlex
 import os
-from .contstants import *
+from .constants import *
 
 class AdminConfig(object):
     KEYS = [ 'validator_config_path',
