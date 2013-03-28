@@ -10,6 +10,7 @@ import re
 import subprocess
 from eucadmin import configfile
 from eucadmin import iputils
+from eucadmin.constants import *
 
 euca_home = os.environ.get('EUCALYPTUS', '/')
 
@@ -17,8 +18,8 @@ roles = set(['CLC', 'WS', 'SC', 'CC', 'NC'])
 if os.environ.has_key('EUCA_ROLES'):
     roles = set(os.environ['EUCA_ROLES'].split(','))
 
-cf = configfile.ConfigFile(os.path.join(euca_home,
-                                        'etc/eucalyptus/eucalyptus.conf'))
+cf = configfile.EucaConfigFile(os.path.join(euca_home,
+                               EUCA_CONF_FILE))
 
 subchecks = {}
 
