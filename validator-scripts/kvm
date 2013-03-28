@@ -4,14 +4,14 @@ MODULE=$( lsmod | awk '/^kvm_(intel|amd)/ { print $1 }' )
 
 if [ -z "$MODULE" ]; then
 cat <<EOF
-{ "failed": 1, 
+{ "failed": 1,
   "error": "no KVM module is loaded",
   "resolution": "Run \"modprobe kvm_intel\" or \"modprobe kvm_amd\", depending on your system"
 }
 EOF
 else
 cat <<EOF
-{ "failed": 0, 
+{ "failed": 0,
   "info": "module '$MODULE' is loaded"
 }
 EOF

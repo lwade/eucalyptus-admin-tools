@@ -301,7 +301,7 @@ if 'CC' in roles and cf['VNET_MODE'] != 'SYSTEM':
                        "error": "VNET_DHCPDAEMON %s is not executable" % cf['VNET_DHCPDAEMON'],
                        "resolution": "chmod +x %s" % cf['VNET_DHCPDAEMON'] })
     subchecks['VNET_DHCPDAEMON'] = check
-       
+
 # VNET_DHCPUSER
 if 'CC' in roles and cf['VNET_MODE'] != 'SYSTEM':
     check = { "failed": 0 }
