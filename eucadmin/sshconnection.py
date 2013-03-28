@@ -369,11 +369,13 @@ class SshConnection():
                 self.refresh_connection()
                 tran = self.connection.get_transport()
             chan = tran.open_session()
+            chan.set_combine_stderr(False)
             chan.settimeout(timeout)
             if get_pty:
                 chan.get_pty()
             chan.exec_command(cmd)
             output = ""
+            err = ""
             fd = chan.fileno()
             chan.setblocking(0)
             cmdstart = start = time.time()
@@ -388,7 +390,12 @@ class SshConnection():
                     raise CommandTimeoutException(
                         "SSH Command timer fired after " + str(int(elapsed)) + " seconds. Cmd:'" + str(cmd) + "'")
                 time.sleep(0.05)
+
                 if len(rl) > 0:
+                    while chan.recv_stderr_ready():
+                        data = chan.recv_stderr(1024)
+                        err += data
+
                     while chan.recv_ready():
                         new = chan.recv(1024)
                         if new is not None:
@@ -436,11 +443,15 @@ class SshConnection():
                 output = output.splitlines()
                 if output is None:
                     output = []
+                err = err.splitlines()
+                if err is None:
+                    err = []
                 #add command outcome in return dict.
             if not status:
                 status = self.lastexitcode = chan.recv_exit_status()
             ret['cmd'] = cmd
             ret['output'] = output
+            ret['error'] = err
             ret['status'] = status
             ret['cbfired'] = cbfired
             ret['elapsed'] = elapsed = int(time.time() - cmdstart)
