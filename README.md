@@ -9,6 +9,22 @@ command classes callable from inside python.
 In addition to better command-line help, this version also introduces
 "euca-validator", a tool for inspecting various aspects of a cloud deployment.
 
+## Changes from older eucalyptus-admin-tools
+
+While the primary differences between the older admin tools and this version
+are internal code changes, it's important to note that the old "euca_conf"
+command line is deprecated in favor of individual commands for describe,
+register, deregister, and other operations.  There is a compatibility
+layer which allows most old euca_conf to work, but some may not, and you
+should consider transitioning to the newer command set.
+
+Examples:
+
+* Instead of "euca_conf --register-cluster", use "euca-register-cluster"
+* Instead of "euca_conf --describe-nodes", use "euca-describe-nodes
+
+and so on.
+
 ## Quick start
 
 ### Assumptions
@@ -81,6 +97,7 @@ report any discrepancies.
 euca-validator can be configured using environment variables or eucadmin.conf
 
 eucadmin.conf:
+
 If /etc/eucadmin/eucadmin.conf exists, or if the "-c" option is given to
 specify a config file, the following settings can be specified:
 
