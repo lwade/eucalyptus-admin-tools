@@ -138,6 +138,10 @@ of CLC,WS,CC,SC,NC,UI).  As more components may be added later, unknown
 components need to be dealt with gracefully (which could mean "ignored").
 * Scripts not intended to run at "preinstall" may assume that $EUCALYPTUS is
 set and that eucalyptus.conf is readable.
+* Any script which fails should return an "error" key, and ideally, a 
+"resolution" key which suggests a possible fix to the problem.
+* Scripts may return keys corresponding to standard log levels, and the
+top-level validator will collect these and log them accordingly.
 
 [1] There is an intent to allow for multi-machine validation scripts for things
 like ensuring that all systems have the same network mode set.  The guidelines

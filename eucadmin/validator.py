@@ -28,6 +28,8 @@ component_map = { 'cluster': 'CC',
                   'walrus':  'WS',
                 }
 
+log_levels = [ 'debug', 'info', 'warn', 'warning', 'error', 'critical' ]
+
 def read_validator_config(files=[]):
     '''
     Read one or more YAML config files and merge them.
@@ -165,10 +167,19 @@ class Validator(object):
         self.log.debug('Script search path is %s' % self.admincfg.validator_script_path)
         for script in data.get(self.stage, {}).get(self.component, []):
             for dirpath in self.admincfg.validator_script_path.split(':'):
-                if os.path.exists(os.path.join(dirpath, script)):
-                    self.log.debug('Running script: %s' % os.path.join(dirpath, script))
-                    return_val = run_script(os.path.join(dirpath, script))
-                    result[script] = json.loads(return_val)
+                scriptPath = os.path.join(dirpath, script)
+                if os.path.exists(scriptPath):
+                    self.log.debug('Running script: %s' % scriptPath)
+                    return_val = run_script(scriptPath)
+                    try:
+                        result[script] = json.loads(return_val)
+                        for level in log_levels:
+                            if result[script].has_key(level):
+                                self.log.log(logging.getLevelName(level.upper()), 
+                                             "%s: %s" % (script, result[script][level]))
+                    except Exception, e:
+                        self.log.error("Script %s did not return valid JSON." % scriptPath)
+                        self.log.debug("returned data was %s" % return_val)
                     break
             if not result.has_key(script):
                 self.log.error("script %s not found" % script) 
