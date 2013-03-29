@@ -66,10 +66,11 @@ def build_parser():
     parser.add_argument('-t', '--traverse', 
                         action='store_true',
                         help='Traverse other components in the cloud (requires ssh credentials)')
-    parser.add_argument('-j', '--json',
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-j', '--json',
                         action='store_true',
                         help='Output JSON-formatted results')
-    parser.add_argument('-q', '--quiet',
+    group.add_argument('-q', '--quiet',
                         action='store_true',
                         help='No output; only a return code')
     parser.add_argument('-l', '--log-level',
