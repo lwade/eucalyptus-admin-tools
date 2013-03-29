@@ -43,7 +43,7 @@ export EUCALYPTUS=/opt/eucalyptus
 euca-validator $@
 ```
 
-### Running euca-validator
+### About euca-validator
 
 euca-validator currently has four "stages".  They are still up for discussion,
 but it made sense to me that these might be distinct check points:
@@ -68,6 +68,33 @@ Currently, checks in "traverse" mode use "describe" calls to locate other
 components in the cloud.  The intent is to also allow the user to specify
 an _expected_ topology of their cloud, in which case the validator should also
 report any discrepancies.
+
+### euca-validator configuration
+
+euca-validator can be configured using environment variables or eucadmin.conf
+
+eucadmin.conf:
+If /etc/eucadmin/eucadmin.conf exists, or if the "-c" option is given to
+specify a config file, the following settings can be specified:
+
+* eucalyptus - The standard variable for determining the "root" of the
+eucalyptus installation.
+* validator_config_path - A colon-separated list of YAML files.  Each file
+should have the same hierarchy: a dictionary of dictionaries of lists. 
+Top-level keys are stages, second-level keys are components, and each 
+second-level value is a list of checks.  These files are merged at run-time,
+and thus each additional configuration may add checks, but it cannot remove
+checks specified by a previous config file.
+* valiadator_script_path - A colon-separated list of directories.  These
+directories will be searched in order for validator scripts.  You may
+override a default script by simply creating a script with the same name in
+a directory with higher precedence.
+
+Environment variables (which override the eucadmin.conf settings):
+
+* EUCALYPTUS (overrides eucalyptus, described above)
+* EUCA_VALIDATOR_CFG_PATH (overrides validator_config_path above)
+* EUCA_VALIDATOR_SCRIPT_PATH (overrides validator_script_path above)
 
 ### Writing a validator script
 
