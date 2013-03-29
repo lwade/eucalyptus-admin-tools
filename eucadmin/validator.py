@@ -55,7 +55,7 @@ def read_validator_config(files=[]):
 
 def build_parser():
     parser = argparse.ArgumentParser(prog='Eucalyptus cloud validator')
-    parser.add_argument('stage',
+    parser.add_argument('stage', metavar='preinstall | postinstall | register | monitor',
                         default='monitor')
     parser.add_argument('-c', '--config-file',
                         default=DEFAULT_CONFIG_FILE,
@@ -72,6 +72,9 @@ def build_parser():
     parser.add_argument('-q', '--quiet',
                         action='store_true',
                         help='No output; only a return code')
+    parser.add_argument('-l', '--log-level',
+                        default='INFO',
+                        help='Log level')
     return parser
 
 def run_script(scriptPath):
@@ -84,7 +87,8 @@ def run_script(scriptPath):
 
 class Validator(object):
     def __init__(self, stage="monitor", component="CLC", traverse=False, 
-                 config_file=DEFAULT_CONFIG_FILE, **kwargs):
+                 config_file=DEFAULT_CONFIG_FILE, log_level="INFO", 
+                 **kwargs):
 
         # TODO: allow a component list?
         os.environ['EUCA_ROLES'] = component
@@ -97,12 +101,12 @@ class Validator(object):
             self.euca_conf = EucaConfigFile(os.path.join(self.admincfg.eucalyptus,
                                                          EUCA_CONF_FILE))
 
-        self.setupLogging()
+        self.setupLogging(logging.getLevelName(log_level))
 
-    def setupLogging(self):
+    def setupLogging(self, level=logging.INFO):
         logging.basicConfig()
         self.log = logging.getLogger(__name__)
-        self.log.setLevel(logging.DEBUG)
+        self.log.setLevel(level)
 
     @classmethod
     def run(cls):
