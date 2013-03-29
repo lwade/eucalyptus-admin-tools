@@ -43,6 +43,32 @@ export EUCALYPTUS=/opt/eucalyptus
 euca-validator $@
 ```
 
+### Running euca-validator
+
+euca-validator currently has four "stages".  They are still up for discussion,
+but it made sense to me that these might be distinct check points:
+
+* preinstall -- This is for checks which can be done on a system before
+eucalyptus itself is installed.
+* postinstall -- This is for checks of the eucalyptus configuration after
+installation, but before component registration.
+* registration -- This is for checks which may be done when a component is
+being registered.  The euca-register-* commands will eventually run these
+checks automatically.
+* monitor -- These checks are for ongoing monitoring of a running cloud.
+
+Additionally, euca-validator has two basic modes of operation: single-machine
+mode (the default), and "traverse" mode.  In single-machine mode, all checks
+are confined to a single component on the system.  In "traverse" mode, 
+multi-machine checks may be done, and the validator will rerun itself on
+other component systems as well (the CLC will execute a validator on each SC, 
+Walrus, and CC will execute a validator on each NC).
+
+Currently, checks in "traverse" mode use "describe" calls to locate other
+components in the cloud.  The intent is to also allow the user to specify
+an _expected_ topology of their cloud, in which case the validator should also
+report any discrepancies.
+
 ### Writing a validator script
 
 The current expectations of a script in the validator-scripts directory are:
