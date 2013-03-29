@@ -113,5 +113,5 @@ setup(name="eucadmin",
           (sys.prefix+"/lib/eucadmin/validator-scripts", glob.glob('validator-scripts/*')),
       ],
       cmdclass={'install_data':  ExecutableDataFiles},
-
+      zip_safe=False,
 )
