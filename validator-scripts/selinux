@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# This script checks whether SELinux is currently in enforcing mode,
+# and also whether it would be in enforcing mode the next time the system
+# reboots.  If currently enforcing, returns a failure.  If it would be
+# enforcing upon reboot, it returns success, but with a warning.
+
 print_kv() {
   while true; do
     echo -n "\"$1\": \"$2\""

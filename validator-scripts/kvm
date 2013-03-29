@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# This is a simple example check script which determines whether an
+# appropriate kvm module is loaded on a Node Controller.
+# Note that it may be better to have a more general script that
+# checks the HYPERVISOR in eucalyptus.conf first.
+
 MODULE=$( lsmod | awk '/^kvm_(intel|amd)/ { print $1 }' )
 
 if [ -z "$MODULE" ]; then
