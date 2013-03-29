@@ -26,7 +26,7 @@ Virtualenv setup is as follows:
 
 * virtualenv --system-site-packages ~/venv-eucadmin
 * source ~/venv-eucadmin/bin/activate
-* git clone git@github.com:a13m/eucalyptus-admin-tools.git
+* git clone git://github.com/a13m/eucalyptus-admin-tools.git
 * cd eucalyptus-admin-tools
 * python setup.py install
 
