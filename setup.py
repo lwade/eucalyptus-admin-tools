@@ -100,6 +100,7 @@ setup(name="eucadmin",
       install_requires=[
           "requestbuilder",
           "argparse",
+          "PyYAML",
       ],
       scripts=[
           "bin/euca_conf",

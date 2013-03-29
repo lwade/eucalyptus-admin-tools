@@ -13,12 +13,12 @@ In addition to better command-line help, this version also introduces
 
 ### Assumptions
 
-* Currently, this code is being tested on CentOS and RHEL 6.
-* Required RPMs include:  python-requests python-six python-argparse
-python-paramiko
-* A requestbuilder RPM is available from
-[gholms' cloud repo](http://repos.fedorapeople.org/repos/gholms/cloud/epel-6/x86_64/)
-* As an alternative to using the RPMs above, you could simply use virtualenv
+* Currently, this code is being tested on CentOS and RHEL 6, mainly using
+virtualenv.
+* If not using virtualenv, Required RPMs include:  python-requests
+python-six python-argparse python-paramiko PyYAML python-requestbuilder
+(the required python-requestbuilder RPM is available from
+[gholms' cloud repo](http://repos.fedorapeople.org/repos/gholms/cloud/epel-6/x86_64/))
 
 ### Setup
 
