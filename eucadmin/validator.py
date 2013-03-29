@@ -78,6 +78,9 @@ def build_parser():
     parser.add_argument('-l', '--log-level',
                         default='INFO',
                         help='Log level')
+    parser.add_argument('-s', '--subtask',
+                        action='store_true',
+                        help='(Internal use) This is a sub-task of another validator')
     return parser
 
 def run_script(scriptPath):
@@ -91,7 +94,7 @@ def run_script(scriptPath):
 class Validator(object):
     def __init__(self, stage="monitor", component="CLC", traverse=False, 
                  config_file=DEFAULT_CONFIG_FILE, log_level="INFO", 
-                 **kwargs):
+                 subtask=False, **kwargs):
 
         # TODO: allow a component list?
         os.environ['EUCA_ROLES'] = component
@@ -99,6 +102,7 @@ class Validator(object):
         self.component = component
         self.traverse = traverse
         self.admincfg = AdminConfig(config_file)
+        self.subtask = subtask
 
         if stage != 'preinstall' or (component == "CC" and traverse):
             self.euca_conf = EucaConfigFile(os.path.join(self.admincfg.eucalyptus,
@@ -123,6 +127,22 @@ class Validator(object):
             sys.exit(Validator.check_nested_result("", result))
         else:
             sys.exit(Validator.check_nested_result("", result, print_output=True))
+
+    def log_nested_result(self, parent, result):
+        for key in result.keys():
+            if type(result[key]) != dict:
+                raise Exception("Error parsing validation data")
+            if result[key].has_key('cmd'):
+                self.log_nested_result(parent + key + ":",
+                                       result[key]['output'])
+            elif not result[key].has_key('failed'):
+                self.log_nested_result(parent + key + ":",
+                                       result[key])
+            else:
+                for level in log_levels:
+                    if result[key].has_key(level):
+                        self.log.log(logging.getLevelName(level.upper()), 
+                                     "%s%s: %s" % (parent, key , result[key][level]))
 
     @staticmethod
     def check_nested_result(parent, result, print_output=False):
@@ -150,10 +170,11 @@ class Validator(object):
        ssh = SshConnection(host, username="root")
        # NB: euca-validator must be in the PATH and must have a usable
        # configuration on the remote system!
-       cmd = 'euca-validator %s -C %s %s -j' % (t, component_map.get(component, component), stage)
+       cmd = 'euca-validator %s -C %s %s -j -s' % (t, component_map.get(component, component), stage)
        out = ssh.cmd(cmd, timeout=600, get_pty=False)
        try:
            out['output'] = json.loads(out['output'])
+           self.log_nested_result("%s-%s:" % (host, component), out['output'])
            return out
        except Exception, e:
            self.log.warning("Remote command failed: %s" % out['output'])
@@ -173,13 +194,15 @@ class Validator(object):
                     return_val = run_script(scriptPath)
                     try:
                         result[script] = json.loads(return_val)
-                        for level in log_levels:
-                            if result[script].has_key(level):
-                                self.log.log(logging.getLevelName(level.upper()), 
-                                             "%s: %s" % (script, result[script][level]))
                     except Exception, e:
                         self.log.error("Script %s did not return valid JSON." % scriptPath)
                         self.log.debug("returned data was %s" % return_val)
+                        break
+                    for level in log_levels:
+                        if result[script].has_key(level):
+                            if not self.subtask:
+                                self.log.log(logging.getLevelName(level.upper()), 
+                                             "%s: %s" % (script, result[script][level]))
                     break
             if not result.has_key(script):
                 self.log.error("script %s not found" % script) 
