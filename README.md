@@ -42,6 +42,8 @@ have not installed the PyGreSQL RPM, PyGreSQL must be built from source, which
 requires that /usr/pgsql-9.1/bin is in your PATH, and that postgresql91-devel
 is installed.  Similarly, M2Crypto requires openssl-devel and swig, and trying
 to build it is fairly likely to make you cry.  Just use the RPM.
+* Until requestbuilder has [proper install_requires](https://github.com/boto/requestbuilder/pull/3),
+you will need to "pip install requests six" to get those two requirements.
 
 ### Setup
 
