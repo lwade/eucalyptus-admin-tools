@@ -101,6 +101,7 @@ setup(name="eucadmin",
           "requestbuilder",
           "argparse",
           "PyYAML",
+          "paramiko",
       ],
       scripts=[
           "bin/euca_conf",
