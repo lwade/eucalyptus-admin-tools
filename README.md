@@ -15,10 +15,17 @@ In addition to better command-line help, this version also introduces
 
 * Currently, this code is being tested on CentOS and RHEL 6, mainly using
 virtualenv.
-* If not using virtualenv, Required RPMs include:  python-requests
+* It is recommended that you install PyGreSQL and M2Crypto from RPMs
+regardless of whether you are using virtualenv.
+* If not using virtualenv, other required RPMs include:  python-requests
 python-six python-argparse python-paramiko PyYAML python-requestbuilder
 (the required python-requestbuilder RPM is available from
 [gholms' cloud repo](http://repos.fedorapeople.org/repos/gholms/cloud/epel-6/x86_64/))
+* When using virtualenv, if you omit "--system-site-packages" or if you
+have not installed the PyGreSQL RPM, PyGreSQL must be built from source, which
+requires that /usr/pgsql-9.1/bin is in your PATH, and that postgresql91-devel
+is installed.  Similarly, M2Crypto requires openssl-devel and swig, and trying
+to build it is fairly likely to make you cry.  Just use the RPM.
 
 ### Setup
 

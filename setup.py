@@ -102,6 +102,8 @@ setup(name="eucadmin",
           "argparse",
           "PyYAML",
           "paramiko",
+          "PyGreSQL",
+          "M2Crypto",
       ],
       scripts=[
           "bin/euca_conf",
