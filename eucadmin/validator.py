@@ -23,12 +23,12 @@ sys.excepthook = debug.gen_except_hook(True, True)
 
 # Currently, these three are the only components returned by
 # DescribeServices that we traverse.
-component_map = { 'cluster': 'CC',
+COMPONENT_MAP = { 'cluster': 'CC',
                   'storage': 'SC',
                   'walrus':  'WS',
                 }
 
-log_levels = [ 'debug', 'info', 'warn', 'warning', 'error', 'critical' ]
+LOG_LEVELS = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL']
 
 def read_validator_config(files=[]):
     '''
@@ -56,9 +56,11 @@ def read_validator_config(files=[]):
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(prog='Eucalyptus cloud validator')
-    parser.add_argument('stage', metavar='preinstall | postinstall | register | monitor',
-                        default='monitor')
+    parser = argparse.ArgumentParser(description='Eucalyptus cloud validator')
+    parser.add_argument('stage', choices=('preinstall', 'postinstall',
+                                          'register', 'monitor'),
+                        default='monitor',
+                        help='Which test stage to run (default: monitor)')
     parser.add_argument('-c', '--config-file',
                         default=DEFAULT_CONFIG_FILE,
                         help='The path to the eucadmin config')
@@ -75,12 +77,11 @@ def build_parser():
     group.add_argument('-q', '--quiet',
                         action='store_true',
                         help='No output; only a return code')
-    parser.add_argument('-l', '--log-level',
-                        default='INFO',
-                        help='Log level')
-    parser.add_argument('-s', '--subtask',
-                        action='store_true',
-                        help='(Internal use) This is a sub-task of another validator')
+    parser.add_argument('-l', '--log-level', choices=LOG_LEVELS,
+                        default='INFO', type=str.upper,
+                        help='Log level (default: INFO)')
+    parser.add_argument('-s', '--subtask', action='store_true',
+                        help=argparse.SUPPRESS)  # subtask of another validator
     return parser
 
 def run_script(scriptPath):
@@ -139,7 +140,7 @@ class Validator(object):
                 self.log_nested_result(parent + key + ":",
                                        result[key])
             else:
-                for level in log_levels:
+                for level in LOG_LEVELS:
                     if result[key].has_key(level):
                         self.log.log(logging.getLevelName(level.upper()), 
                                      "%s%s: %s" % (parent, key , result[key][level]))
@@ -170,7 +171,7 @@ class Validator(object):
        ssh = SshConnection(host, username="root")
        # NB: euca-validator must be in the PATH and must have a usable
        # configuration on the remote system!
-       cmd = 'euca-validator %s -C %s %s -j -s' % (t, component_map.get(component, component), stage)
+       cmd = 'euca-validator %s -C %s %s -j -s' % (t, COMPONENT_MAP.get(component, component), stage)
        out = ssh.cmd(cmd, timeout=600, get_pty=False)
        try:
            out['output'] = json.loads(out['output'])
@@ -198,7 +199,7 @@ class Validator(object):
                         self.log.error("Script %s did not return valid JSON." % scriptPath)
                         self.log.debug("returned data was %s" % return_val)
                         break
-                    for level in log_levels:
+                    for level in LOG_LEVELS:
                         if result[script].has_key(level):
                             if not self.subtask:
                                 self.log.log(logging.getLevelName(level.upper()), 
@@ -217,7 +218,7 @@ class Validator(object):
                 hostname = urllib.splitport(urlparse.urlparse(service['serviceId']['uri']).netloc)[0]
                 status = service['localState']
                 component_type = service['serviceId']['type'] 
-                if component_map.get(component_type):
+                if COMPONENT_MAP.get(component_type):
                     hosts.append((hostname, component_type, status))
 
             for host, component_type, status in hosts:
