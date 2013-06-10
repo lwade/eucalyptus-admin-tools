@@ -37,35 +37,12 @@ class EncodeProperty(argparse.Action):
         setattr(namespace, 'Name', t[0])
         setattr(namespace, 'Value', t[1])
 
-class EncodePropFromFile(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        t = values.split('=', 1)
-        if len(t) != 2:
-            print >>sys.stderr, "Options must be of the form KEY=VALUE: %s" % values
-            sys.exit(1)
-        setattr(namespace, 'Name', t[0])
-        path = t[1]
-        if path == '-':
-            values = sys.stdin.read()
-        else:
-            path = os.path.expanduser(path)
-            path = os.path.expandvars(path)
-            if os.path.isfile(path):
-                fp = open(path)
-                values = fp.read()
-                fp.close()
-            else:
-                print 'Error: Unable to read file: %s' % path
-                sys.exit(1)
-        setattr(namespace, 'Value', value)
-
 class ResetProperty(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, 'Name', values)
         setattr(namespace, 'Reset', True)
 
 class ModifyPropertyValue(EucalyptusAdminRequest):
-
     SERVICE_PATH = 'services/Properties'
     DESCRIPTION = 'Modify property'
     METHOD = 'POST'
@@ -73,9 +50,6 @@ class ModifyPropertyValue(EucalyptusAdminRequest):
     ARGS = [ Arg('-p', '--property', 
                  action=EncodeProperty,
                  help='Modify property (KEY=VALUE)'),
-             Arg('-f', '--property-from-file', 
-                 action=EncodePropFromFile,
-                 help='Modify property with content of file'),
              Arg('-r', '--reset-property', 
                  action=ResetProperty,
                  help='Reset this property to default value.')]
